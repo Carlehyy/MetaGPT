@@ -9,11 +9,12 @@ from typing import List, Dict, Optional
 from dataclasses import dataclass
 from datetime import datetime
 
-from ..discussion.engine import DiscussionEngine, DiscussionConfig
-from ..discussion.state import DiscussionState
-from ..feishu.bot import FeishuBot, FeishuConfig
-from ..feishu.card import CardBuilder
-from ..feishu.reminder import ReminderService
+from discussion.engine import DiscussionEngine, DiscussionConfig
+from discussion.round_robin import Role
+from discussion.state import DiscussionState
+from feishu.bot import FeishuBot, FeishuConfig
+from feishu.card import CardBuilder
+from feishu.reminder import ReminderManager as ReminderService
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ class CompanyConfig:
     feishu_app_secret: str = ""
     max_rounds_per_phase: int = 20
     consensus_threshold: float = 0.8
+    demo_mode: bool = False
 
 
 class AgentCompany:
@@ -82,9 +84,13 @@ class AgentCompany:
         
         logger.info(f"启动新项目: {idea}")
         
-        # 发送欢迎卡片
-        welcome_card = CardBuilder.build_welcome_card()
-        await self.feishu_bot.send_card_message(chat_id, welcome_card)
+        # 演示模式下跳过飞书消息发送
+        if not self.config.demo_mode:
+            # 发送欢迎卡片
+            welcome_card = CardBuilder().build()
+            await self.feishu_bot.send_message(chat_id, "欢迎使用AI Team！")
+        else:
+            logger.info("[演示模式] 跳过发送飞书消息")
         
         # 开始第一个阶段
         await self.start_phase(self.current_phase_idx, chat_id)
@@ -93,7 +99,8 @@ class AgentCompany:
         """开始指定阶段"""
         if phase_idx >= len(self.PHASES):
             logger.info("所有阶段已完成")
-            await self.feishu_bot.send_text_message(chat_id, "🎉 项目已完成！")
+            if not self.config.demo_mode:
+                await self.feishu_bot.send_text_message(chat_id, "🎉 项目已完成！")
             return
         
         phase = self.PHASES[phase_idx]
@@ -101,11 +108,14 @@ class AgentCompany:
         
         logger.info(f"开始阶段: {phase['name']}")
         
-        # 发送阶段开始通知
-        await self.feishu_bot.send_text_message(
-            chat_id,
-            f"📋 开始阶段 {phase['id']}: {phase['name']}\n负责人: {phase['leader']}"
-        )
+        # 发送阶段开始通知（非演示模式）
+        if not self.config.demo_mode:
+            await self.feishu_bot.send_text_message(
+                chat_id,
+                f"📋 开始阶段 {phase['id']}: {phase['name']}\n负责人: {phase['leader']}"
+            )
+        else:
+            logger.info(f"[演示模式] 阶段 {phase['id']}: {phase['name']}")
         
         # 创建讨论引擎
         discussion_config = DiscussionConfig(
@@ -113,30 +123,40 @@ class AgentCompany:
             consensus_threshold=self.config.consensus_threshold
         )
         
+        # 将字典转换为Role对象
+        roles = [
+            Role(
+                id=r["user_id"],
+                name=r["name"],
+                description=r["role"],
+                is_boss=(r["role"] == "boss")
+            )
+            for r in self.ROLES
+        ]
+
         self.current_discussion = DiscussionEngine(
-            participants=self.ROLES,
+            roles=roles,
             phase=phase["name"],
             config=discussion_config
         )
         
-        # 注册回调
-        self.current_discussion.register_message_callback(
-            lambda msg: self._on_message(msg, chat_id)
-        )
-        self.current_discussion.register_state_callback(
-            lambda status: self._on_state_change(status, chat_id)
+        # 注册回调（使用DiscussionEngine支持的方法）
+        self.current_discussion.on_state_change(
+            lambda old, new: self._on_state_change(new, chat_id)
         )
         
         # 开始讨论
         await self.current_discussion.start_discussion(self.project_idea)
         
-        # 发送第一轮通知
+        # 发送第一轮通知（演示模式下跳过）
         first_speaker = await self.current_discussion.next_turn()
-        if first_speaker:
+        if first_speaker and not self.config.demo_mode:
             await self.feishu_bot.send_text_message(
                 chat_id,
-                f"🎯 第1轮讨论开始\n👤 请 @{first_speaker['name']} 发言"
+                f"🎯 第1轮讨论开始\n👤 请 @{first_speaker.sender_name} 发言"
             )
+        elif first_speaker:
+            logger.info(f"[演示模式] 第1轮，请 @{first_speaker.sender_name} 发言")
     
     async def handle_message(self, sender: str, content: str, chat_id: str):
         """处理用户消息"""
@@ -153,16 +173,27 @@ class AgentCompany:
                     return
         
         # 添加到讨论
-        if self.current_discussion and self.current_discussion.status.state == DiscussionState.ONGOING:
-            await self.current_discussion.add_message(sender, content)
+        if self.current_discussion and self.current_discussion.state_manager.current_state == DiscussionState.ONGOING:
+            # 创建消息对象并提交
+            from discussion.message import Message, MessageType
+            message = Message(
+                content=content,
+                sender_id=sender.lower().replace(" ", "_"),
+                sender_name=sender,
+                message_type=MessageType.SPEECH
+            )
+            self.current_discussion.submit_message(message)
             
             # 获取下一个发言者
             next_speaker = await self.current_discussion.next_turn()
             if next_speaker:
-                await self.feishu_bot.send_text_message(
-                    chat_id,
-                    f"👤 请 @{next_speaker['name']} 发言 (第{next_speaker['round']}轮)"
-                )
+                if not self.config.demo_mode:
+                    await self.feishu_bot.send_text_message(
+                        chat_id,
+                        f"👤 请 @{next_speaker.sender_name} 发言 (第{next_speaker.round_number}轮)"
+                    )
+                else:
+                    logger.info(f"[演示模式] 请 @{next_speaker.sender_name} 发言 (第{next_speaker.round_number}轮)")
     
     async def _on_message(self, message, chat_id: str):
         """消息回调"""
@@ -237,4 +268,4 @@ class AgentCompany:
     
     async def close(self):
         """关闭资源"""
-        await self.feishu_bot.close()
+        pass  # feishu_bot.close() not available

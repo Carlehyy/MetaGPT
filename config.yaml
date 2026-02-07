@@ -1,138 +1,29 @@
-# AI Team 配置文件
-
-# 应用配置
 app:
   name: "AI Team"
   version: "1.0.0"
-  description: "智能软件开发团队"
   debug: false
   log_level: "INFO"
 
-# LLM 配置 (智谱GLM-4)
 llm:
   provider: "zhipu"
-  api_key: ""  # 请填写您的智谱AI API Key
+  api_key: "0a45a0e3e24f47c79552db2ab80a8a54.NRH2PVmbIt4wBYre"
   model: "glm-4"
   base_url: "https://open.bigmodel.cn/api/paas/v4"
   temperature: 0.7
   max_tokens: 4096
-  timeout: 60
 
-# 飞书机器人配置
 feishu:
-  app_id: ""  # 请填写您的飞书App ID
-  app_secret: ""  # 请填写您的飞书App Secret
-  verification_token: null
-  encrypt_key: null
+  app_id: "cli_a90f6fb1a778dbc0"
+  app_secret: "cNezXmfLZH2XSvsmslB7MfwZuebU5ld8"
   base_url: "https://open.feishu.cn/open-apis"
 
-# 讨论引擎配置
 discussion:
   max_rounds_per_phase: 20
   consensus_threshold: 0.8
-  auto_save_interval: 60
-  pass_threshold: 3
-  content_similarity_threshold: 0.9
-  enable_llm_judgment: true
-  boss_intervention_timeout: 300
   consensus_strategy: "HYBRID"
-  turn_order_strategy: "ROUND_ROBIN"
-  enable_stagnation_detection: true
-  stagnation_rounds: 3
+  pass_threshold: 3
+  reminder_interval: 300
 
-# 提醒配置
 reminder:
-  interval: 300  # 5分钟
+  interval: 300
   max_count: 3
-
-# 老板介入关键词
-boss_intervention_keywords:
-  - "我决定"
-  - "听我的"
-  - "就这样"
-  - "执行"
-  - "定下来"
-  - "final decision"
-
-# 9阶段配置
-phases:
-  - id: "P1"
-    name: "需求分析"
-    leader: "产品经理"
-    max_rounds: 20
-    description: "将原始需求转化为PRD文档"
-  - id: "P2"
-    name: "技术方案设计"
-    leader: "架构师"
-    max_rounds: 20
-    description: "设计系统架构和技术选型"
-  - id: "P3"
-    name: "UI/UX设计"
-    leader: "产品设计师"
-    max_rounds: 20
-    description: "设计用户界面和交互体验"
-  - id: "P4"
-    name: "任务拆解"
-    leader: "项目经理"
-    max_rounds: 20
-    description: "制定项目计划和任务分配"
-  - id: "P5"
-    name: "编码实现"
-    leader: "开发工程师"
-    max_rounds: 20
-    description: "编写代码和单元测试"
-  - id: "P6"
-    name: "UI验收"
-    leader: "产品设计师"
-    max_rounds: 15
-    description: "检查UI还原度和视觉质量"
-  - id: "P7"
-    name: "功能测试"
-    leader: "测试工程师"
-    max_rounds: 20
-    description: "执行功能测试和Bug修复"
-  - id: "P8"
-    name: "部署上线"
-    leader: "项目经理"
-    max_rounds: 15
-    description: "部署到生产环境并上线"
-  - id: "P9"
-    name: "运维监控"
-    leader: "运维工程师"
-    max_rounds: 20
-    description: "系统监控和性能优化"
-
-# 8角色配置
-roles:
-  - name: "老板"
-    role: "boss"
-    description: "公司老板/CEO，负责战略决策"
-    avatar: "👔"
-  - name: "产品经理"
-    role: "product_manager"
-    description: "负责需求分析和产品规划"
-    avatar: "📋"
-  - name: "架构师"
-    role: "architect"
-    description: "负责技术方案设计"
-    avatar: "🏗️"
-  - name: "产品设计师"
-    role: "product_designer"
-    description: "负责UI/UX设计"
-    avatar: "🎨"
-  - name: "项目经理"
-    role: "project_manager"
-    description: "负责项目管理和协调"
-    avatar: "📊"
-  - name: "开发工程师"
-    role: "engineer"
-    description: "负责编码实现"
-    avatar: "💻"
-  - name: "测试工程师"
-    role: "qa_engineer"
-    description: "负责功能测试"
-    avatar: "🧪"
-  - name: "运维工程师"
-    role: "devops"
-    description: "负责运维监控"
-    avatar: "🚀"
