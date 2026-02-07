@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI虚拟软件公司 - 团队协作</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        role: {
+                            boss: '#8b5cf6',
+                            pm: '#f59e0b',
+                            architect: '#10b981',
+                            designer: '#ec4899',
+                            pjm: '#06b6d4',
+                            engineer: '#6366f1',
+                            qa: '#f97316',
+                            devops: '#14b8a6',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <div class="flex h-screen overflow-hidden">
+        <!-- 左侧边栏 - 开发阶段 -->
+        <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <h1 class="text-xl font-bold text-primary-600 dark:text-primary-500 flex items-center gap-2">
+                    <span class="text-2xl">🚀</span>
+                    AI软件公司
+                </h1>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">虚拟团队协作平台</p>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4">
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">开发阶段</h2>
+                <nav class="space-y-1" id="phase-nav">
+                    <!-- 阶段列表由JS生成 -->
+                </nav>
+            </div>
+            
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">主题</span>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                        <span class="dark:hidden">🌙</span>
+                        <span class="hidden dark:inline">☀️</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 中间区域 - 聊天界面 -->
+        <main class="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900">
+            <!-- 顶部标题栏 -->
+            <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold" id="current-phase-title">需求分析阶段</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" id="current-phase-desc">产品经理正在收集和分析需求</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span class="text-sm text-green-600 dark:text-green-400">团队协作中</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 聊天消息区域 -->
+            <div class="flex-1 overflow-y-auto p-6" id="chat-container">
+                <div class="max-w-4xl mx-auto space-y-4" id="message-list">
+                    <!-- 消息由JS生成 -->
+                </div>
+            </div>
+
+            <!-- 底部输入框 -->
+            <div class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex items-end gap-3">
+                        <div class="flex-1 relative">
+                            <textarea 
+                                id="message-input" 
+                                rows="1"
+                                placeholder="输入消息... 使用 @角色名 提及团队成员"
+                                class="w-full px-4 py-3 pr-12 bg-gray-100 dark:bg-gray-700 border-0 rounded-xl resize-none focus:ring-2 focus:ring-primary-500 focus:bg-white dark:focus:bg-gray-600 transition-all"
+                            ></textarea>
+                            <button id="emoji-btn" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                😊
+                            </button>
+                        </div>
+                        <button 
+                            id="send-btn" 
+                            class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium transition-colors flex items-center gap-2"
+                        >
+                            <span>发送</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-4 mt-2 text-xs text-gray-400">
+                        <span>💡 提示: @产品经理 @架构师 @设计师 @项目经理 @开发工程师 @测试工程师 @运维工程师</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 右侧边栏 - 角色列表 -->
+        <aside class="w-72 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">团队成员</h2>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4">
+                <div class="space-y-3" id="role-list">
+                    <!-- 角色列表由JS生成 -->
+                </div>
+            </div>
+            
+            <!-- 当前阶段进度 -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="text-sm font-semibold mb-3">阶段进度</h3>
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-500 dark:text-gray-400">总体进度</span>
+                            <span class="font-medium" id="overall-progress">11%</span>
+                        </div>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-primary-500 rounded-full transition-all duration-500" style="width: 11%"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">当前阶段</span>
+                        <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full" id="current-phase-badge">P1</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 提及弹窗 -->
+    <div id="mention-popup" class="fixed hidden bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50 max-h-48 overflow-y-auto">
+        <!-- 提及选项由JS生成 -->
+    </div>
+
+    <script src="../static/js/app.js"></script>
+</body>
+</html>
