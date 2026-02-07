@@ -1,177 +1,248 @@
-
-# MetaGPT: The Multi-Agent Framework
-
-<p align="center">
-<a href=""><img src="docs/resources/MetaGPT-new-log.png" alt="MetaGPT logo: Enable GPT to work in a software company, collaborating to tackle more complex tasks." width="150px"></a>
-</p>
+# AI Team - 智能软件开发团队
 
 <p align="center">
-[ <b>En</b> |
-<a href="docs/README_CN.md">中</a> |
-<a href="docs/README_FR.md">Fr</a> |
-<a href="docs/README_JA.md">日</a> ]
-<b>Assign different roles to GPTs to form a collaborative entity for complex tasks.</b>
+  <img src="https://img.shields.io/badge/Python-3.10+-blue" alt="Python">
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
+  <img src="https://img.shields.io/badge/AI-Team-orange" alt="AI Team">
 </p>
 
-<p align="center">
-<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-<a href="https://discord.gg/DYn29wFk9z"><img src="https://img.shields.io/badge/Join-Discord-gGnrXvVz7a?logo=discord" alt="Discord Follow"></a>
-<a href="https://twitter.com/MetaGPT_"><img src="https://img.shields.io/twitter/follow/MetaGPT?style=social" alt="Twitter Follow"></a>
-</p>
+**AI Team** 是一个由8个AI角色组成的虚拟软件公司，通过群聊讨论协作完成从需求分析到运维监控的完整软件开发生命周期。
 
-<h4 align="center">
-    
-</h4>
+🚀 **9阶段软件开发流程自动化** | 💬 **狼人杀式群聊讨论** | 🤖 **飞书机器人集成**
 
-## News
+---
 
-🚀 Mar. 10, 2025: 🎉 [mgx.dev](https://mgx.dev/) is the #1 Product of the Week on @ProductHunt! 🏆
+## 📢 最新动态
 
-🚀 Mar. &nbsp; 4, 2025: 🎉 [mgx.dev](https://mgx.dev/) is the #1 Product of the Day on @ProductHunt! 🏆
+**2026-02-07** 🎉 AI Team v1.0 正式发布！支持9阶段软件开发流程、群聊讨论模式、飞书机器人集成。
 
-🚀 Feb. 19, 2025: Today we are officially launching our natural language programming product: [MGX (MetaGPT X)](https://mgx.dev/) - the world's first AI agent development team. More details on [Twitter](https://x.com/MetaGPT_/status/1892199535130329356).
+---
 
-🚀 Feb. 17, 2025: We introduced two papers: [SPO](https://arxiv.org/pdf/2502.06855) and [AOT](https://arxiv.org/pdf/2502.12018), check the [code](examples)!
+## ✨ 核心特性
 
-🚀 Jan. 22, 2025: Our paper [AFlow: Automating Agentic Workflow Generation](https://openreview.net/forum?id=z5uVAKwmjf) accepted for **oral presentation (top 1.8%)** at ICLR 2025, **ranking #2** in the LLM-based Agent category.
+### 🏢 8个AI角色协同工作
 
-👉👉 [Earlier news](docs/NEWS.md) 
+| 角色 | 职责 | 负责阶段 |
+|------|------|----------|
+| 👔 **老板** | 战略决策、最终审批 | 关键决策点 |
+| 📋 **产品经理** | 需求分析、产品规划 | P1 需求分析 |
+| 🏗️ **架构师** | 技术方案、架构设计 | P2 技术方案设计 |
+| 🎨 **产品设计师** | UI/UX设计、设计验收 | P3 UI/UX设计、P6 UI验收 |
+| 📊 **项目经理** | 项目管理、进度把控 | P4 任务拆解、P8 部署上线 |
+| 💻 **开发工程师** | 编码实现、技术文档 | P5 编码实现 |
+| 🧪 **测试工程师** | 功能测试、质量保障 | P7 功能测试 |
+| 🚀 **运维工程师** | 运维监控、性能优化 | P9 运维监控 |
 
-## Software Company as Multi-Agent System
+### 📋 9阶段软件开发流程
 
-1. MetaGPT takes a **one line requirement** as input and outputs **user stories / competitive analysis / requirements / data structures / APIs / documents, etc.**
-2. Internally, MetaGPT includes **product managers / architects / project managers / engineers.** It provides the entire process of a **software company along with carefully orchestrated SOPs.**
-   1. `Code = SOP(Team)` is the core philosophy. We materialize SOP and apply it to teams composed of LLMs.
-
-![A software company consists of LLM-based roles](docs/resources/software_company_cd.jpeg)
-
-<p align="center">Software Company Multi-Agent Schematic (Gradually Implementing)</p>
-
-## Get Started
-
-### Installation
-
-> Ensure that Python 3.9 or later, but less than 3.12, is installed on your system. You can check this by using: `python --version`.  
-> You can use conda like this: `conda create -n metagpt python=3.9 && conda activate metagpt`
-
-```bash
-pip install --upgrade metagpt
-# or `pip install --upgrade git+https://github.com/geekan/MetaGPT.git`
-# or `git clone https://github.com/geekan/MetaGPT && cd MetaGPT && pip install --upgrade -e .`
+```
+P1: 需求分析 → P2: 技术方案设计 → P3: UI/UX设计 → P4: 任务拆解
+   → P5: 编码实现 → P6: UI验收 → P7: 功能测试 → P8: 部署上线 → P9: 运维监控
 ```
 
-**Install [node](https://nodejs.org/en/download) and [pnpm](https://pnpm.io/installation#using-npm) before actual use.**
+### 💬 群聊讨论模式
 
-For detailed installation guidance, please refer to [cli_install](https://docs.deepwisdom.ai/main/en/guide/get_started/installation.html#install-stable-version)
- or [docker_install](https://docs.deepwisdom.ai/main/en/guide/get_started/installation.html#install-with-docker)
+- **轮流发言**：狼人杀式轮询，确保每个角色有序发言
+- **达成共识**：多策略共识检测（显式同意、Pass比例、内容相似度）
+- **轮次限制**：每阶段最多20轮，防止无限讨论
+- **老板介入**：随时@老板进行人工决策
 
-### Configuration
+### 🤖 飞书机器人集成
 
-You can init the config of MetaGPT by running the following command, or manually create `~/.metagpt/config2.yaml` file:
-```bash
-# Check https://docs.deepwisdom.ai/main/en/guide/get_started/configuration.html for more details
-metagpt --init-config  # it will create ~/.metagpt/config2.yaml, just modify it to your needs
+- 富文本卡片消息（角色头像、发言内容、当前轮数）
+- 5分钟间隔提醒机制
+- @提醒功能
+- 分阶段群聊管理
+
+---
+
+## 🏗️ 架构设计
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        AI Team                              │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │   讨论引擎   │  │   工作流    │  │  飞书机器人  │         │
+│  │  Discussion │  │  Workflow   │  │   Feishu    │         │
+│  │   Engine    │  │   Manager   │  │    Bot      │         │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘         │
+│         │                │                │                │
+│  ┌──────┴────────────────┴────────────────┴──────┐         │
+│  │              AgentCompany 主类                │         │
+│  └──────────────────┬────────────────────────────┘         │
+│                     │                                       │
+│  ┌──────────────────┴────────────────────────────┐         │
+│  │              8个AI角色团队                     │         │
+│  │  老板、产品经理、架构师、设计师、项目经理、    │         │
+│  │  开发工程师、测试工程师、运维工程师           │         │
+│  └───────────────────────────────────────────────┘         │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-You can configure `~/.metagpt/config2.yaml` according to the [example](https://github.com/geekan/MetaGPT/blob/main/config/config2.example.yaml) and [doc](https://docs.deepwisdom.ai/main/en/guide/get_started/configuration.html):
+---
+
+## 🚀 快速开始
+
+### 1. 安装依赖
+
+```bash
+pip install httpx pyyaml pydantic
+```
+
+### 2. 配置API密钥
+
+编辑 `config.yaml`：
 
 ```yaml
 llm:
-  api_type: "openai"  # or azure / ollama / groq etc. Check LLMType for more options
-  model: "gpt-4-turbo"  # or gpt-3.5-turbo
-  base_url: "https://api.openai.com/v1"  # or forward url / other llm url
-  api_key: "YOUR_API_KEY"
+  api_key: "your_zhipu_api_key"
+  model: "glm-4"
+
+feishu:
+  app_id: "your_feishu_app_id"
+  app_secret: "your_feishu_app_secret"
 ```
 
-### Usage
-
-After installation, you can use MetaGPT at CLI
+### 3. 运行演示
 
 ```bash
-metagpt "Create a 2048 game"  # this will create a repo in ./workspace
+python main.py --demo
 ```
 
-or use it as library
+### 4. 启动项目
+
+```bash
+python main.py --idea "开发一个智能客服系统"
+```
+
+---
+
+## 📖 使用指南
+
+### 飞书机器人配置
+
+1. 在[飞书开放平台](https://open.feishu.cn/)创建企业自建应用
+2. 获取 App ID 和 App Secret
+3. 配置机器人权限：`im:chat:readonly`, `im:message:send`, `im:message:group_msg`
+4. 将机器人添加到群聊
+
+### 与AI团队协作
+
+1. **@机器人** 并描述你的需求
+2. **等待讨论** - AI团队会自动进行群聊讨论
+3. **查看进度** - 通过飞书卡片查看讨论过程和决策
+4. **介入决策** - 随时@老板进行人工干预
+
+---
+
+## 📁 项目结构
+
+```
+.
+├── main.py                      # 主程序入口
+├── config.yaml                  # 配置文件
+├── requirements.txt             # 依赖列表
+├── README.md                    # 项目说明
+├── company/                     # 公司模块
+│   ├── agent_company.py        # 公司主类
+│   └── workflow.py             # 工作流管理
+├── discussion/                  # 讨论引擎模块
+│   ├── engine.py               # 讨论引擎核心
+│   ├── consensus.py            # 共识检测
+│   ├── state.py                # 状态管理
+│   └── message.py              # 消息定义
+├── feishu/                      # 飞书机器人模块
+│   ├── bot.py                  # 机器人主类
+│   ├── message.py              # 消息处理
+│   ├── card.py                 # 卡片构建
+│   └── reminder.py             # 提醒服务
+└── roles/                       # 角色定义
+    ├── role_matrix.py          # 职责矩阵
+    ├── boss.py                 # 老板
+    ├── product_manager.py      # 产品经理
+    ├── architect.py            # 架构师
+    ├── product_designer.py     # 产品设计师
+    ├── project_manager.py      # 项目经理
+    ├── engineer.py             # 开发工程师
+    ├── qa_engineer.py          # 测试工程师
+    └── devops.py               # 运维工程师
+```
+
+---
+
+## ⚙️ 配置说明
+
+### 讨论引擎配置
+
+```yaml
+discussion:
+  max_rounds_per_phase: 20        # 每阶段最大轮数
+  consensus_threshold: 0.8        # 共识阈值
+  consensus_strategy: "HYBRID"    # 共识策略
+  reminder_interval: 300          # 提醒间隔（秒）
+```
+
+### 共识检测策略
+
+- **EXPLICIT**: 显式同意检测
+- **PASS_RATIO**: Pass比例检测
+- **CONTENT_SIMILARITY**: 内容相似度检测
+- **HYBRID**: 混合策略（推荐）
+
+---
+
+## 🔧 高级功能
+
+### 自定义角色
+
+在 `roles/` 目录下创建新的角色类：
 
 ```python
-from metagpt.software_company import generate_repo
-from metagpt.utils.project_repo import ProjectRepo
+from roles.role_matrix import ParticipationType
 
-repo: ProjectRepo = generate_repo("Create a 2048 game")  # or ProjectRepo("<path>")
-print(repo)  # it will print the repo structure with files
+class MyRole(Role):
+    def __init__(self):
+        super().__init__(
+            name="自定义角色",
+            profile="角色描述",
+            goal="角色目标",
+            constraints="角色约束"
+        )
 ```
 
-You can also use [Data Interpreter](https://github.com/geekan/MetaGPT/tree/main/examples/di) to write code:
+### 自定义阶段
+
+在 `company/workflow.py` 中添加新的阶段：
 
 ```python
-import asyncio
-from metagpt.roles.di.data_interpreter import DataInterpreter
-
-async def main():
-    di = DataInterpreter()
-    await di.run("Run data analysis on sklearn Iris dataset, include a plot")
-
-asyncio.run(main())  # or await main() in a jupyter notebook setting
+PHASES = [
+    {"id": "P10", "name": "自定义阶段", "leader": "产品经理"},
+    # ...
+]
 ```
 
+---
 
-### QuickStart & Demo Video
-- Try it on [MetaGPT Huggingface Space](https://huggingface.co/spaces/deepwisdom/MetaGPT-SoftwareCompany)
-- [Matthew Berman: How To Install MetaGPT - Build A Startup With One Prompt!!](https://youtu.be/uT75J_KG_aY)
-- [Official Demo Video](https://github.com/geekan/MetaGPT/assets/2707039/5e8c1062-8c35-440f-bb20-2b0320f8d27d)
+## 🤝 参与贡献
 
-https://github.com/user-attachments/assets/888cb169-78c3-4a42-9d62-9d90ed3928c9
+欢迎提交Issue和Pull Request！
 
-## Tutorial
+---
 
-- 🗒 [Online Document](https://docs.deepwisdom.ai/main/en/)
-- 💻 [Usage](https://docs.deepwisdom.ai/main/en/guide/get_started/quickstart.html)  
-- 🔎 [What can MetaGPT do?](https://docs.deepwisdom.ai/main/en/guide/get_started/introduction.html)
-- 🛠 How to build your own agents? 
-  - [MetaGPT Usage & Development Guide | Agent 101](https://docs.deepwisdom.ai/main/en/guide/tutorials/agent_101.html)
-  - [MetaGPT Usage & Development Guide | MultiAgent 101](https://docs.deepwisdom.ai/main/en/guide/tutorials/multi_agent_101.html)
-- 🧑‍💻 Contribution
-  - [Develop Roadmap](docs/ROADMAP.md)
-- 🔖 Use Cases
-  - [Data Interpreter](https://docs.deepwisdom.ai/main/en/guide/use_cases/agent/interpreter/intro.html)
-  - [Debate](https://docs.deepwisdom.ai/main/en/guide/use_cases/multi_agent/debate.html)
-  - [Researcher](https://docs.deepwisdom.ai/main/en/guide/use_cases/agent/researcher.html)
-  - [Receipt Assistant](https://docs.deepwisdom.ai/main/en/guide/use_cases/agent/receipt_assistant.html)
-- ❓ [FAQs](https://docs.deepwisdom.ai/main/en/guide/faq.html)
+## 📄 许可证
 
-## Support
+本项目采用 [MIT License](LICENSE) 开源许可证。
 
-### Discord Join US
+---
 
-📢 Join Our [Discord Channel](https://discord.gg/ZRHeExS6xv)! Looking forward to seeing you there! 🎉
+## 💬 联系我们
 
-### Contributor form
+- GitHub Issues: [提交问题](https://github.com/Carlehyy/MetaGPT/issues)
+- 飞书群聊: 加入讨论
 
-📝 [Fill out the form](https://airtable.com/appInfdG0eJ9J4NNL/pagK3Fh1sGclBvVkV/form) to become a contributor. We are looking forward to your participation!
+---
 
-### Contact Information
-
-If you have any questions or feedback about this project, please feel free to contact us. We highly appreciate your suggestions!
-
-- **Email:** alexanderwu@deepwisdom.ai
-- **GitHub Issues:** For more technical inquiries, you can also create a new issue in our [GitHub repository](https://github.com/geekan/metagpt/issues).
-
-We will respond to all questions within 2-3 business days.
-
-## Citation
-
-To stay updated with the latest research and development, follow [@MetaGPT_](https://twitter.com/MetaGPT_) on Twitter. 
-
-To cite [MetaGPT](https://openreview.net/forum?id=VtmBAGCN7o) in publications, please use the following BibTeX entries.   
-
-```bibtex
-@inproceedings{hong2024metagpt,
-      title={Meta{GPT}: Meta Programming for A Multi-Agent Collaborative Framework},
-      author={Sirui Hong and Mingchen Zhuge and Jonathan Chen and Xiawu Zheng and Yuheng Cheng and Jinlin Wang and Ceyao Zhang and Zili Wang and Steven Ka Shing Yau and Zijuan Lin and Liyang Zhou and Chenyu Ran and Lingfeng Xiao and Chenglin Wu and J{\"u}rgen Schmidhuber},
-      booktitle={The Twelfth International Conference on Learning Representations},
-      year={2024},
-      url={https://openreview.net/forum?id=VtmBAGCN7o}
-}
-```
-
-For more work, please refer to [Academic Work](docs/ACADEMIC_WORK.md).
+<p align="center">
+  Made with ❤️ by AI Team
+</p>
