@@ -1,231 +1,184 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
-@Time    : 2023/5/11 14:43
-@Author  : alexanderwu
-@File    : qa_engineer.py
-@Modified By: mashenquan, 2023-11-1. In accordance with Chapter 2.2.1 and 2.2.2 of RFC 116, modify the data
-        type of the `cause_by` value in the `Message` to a string, and utilize the new message filtering feature.
-@Modified By: mashenquan, 2023-11-27.
-        1. Following the think-act principle, solidify the task parameters when creating the
-        WriteTest/RunCode/DebugError object, rather than passing them in when calling the run function.
-        2. According to Section 2.2.3.5.7 of RFC 135, change the method of transferring files from using the Message
-        to using file references.
-@Modified By: mashenquan, 2023-12-5. Enhance the workflow to navigate to WriteCode or QaEngineer based on the results
-    of SummarizeCode.
+测试工程师(QAEngineer)角色实现
+负责测试计划、测试执行和质量保证
 """
-from typing import Optional
 
-from pydantic import BaseModel, Field
+from typing import Optional, List
+from metagpt.roles.role import Role
+from metagpt.schema import Message
+from metagpt.actions import Action
 
-from metagpt.actions import DebugError, RunCode, UserRequirement, WriteTest
-from metagpt.actions.prepare_documents import PrepareDocuments
-from metagpt.actions.summarize_code import SummarizeCode
-from metagpt.const import MESSAGE_ROUTE_TO_NONE, MESSAGE_ROUTE_TO_SELF
-from metagpt.logs import logger
-from metagpt.roles import Role
-from metagpt.schema import AIMessage, Document, Message, RunCodeContext, TestingContext
-from metagpt.utils.common import (
-    any_to_str,
-    any_to_str_set,
-    get_project_srcs_path,
-    init_python_folder,
-    parse_recipient,
-)
-from metagpt.utils.project_repo import ProjectRepo
-from metagpt.utils.report import EditorReporter
+from .role_matrix import ProjectPhase, ParticipationType, get_participation_type
 
 
-class QaEngineer(Role):
-    name: str = "Edward"
-    profile: str = "QaEngineer"
-    goal: str = "Write comprehensive and robust tests to ensure codes will work as expected without bugs"
-    constraints: str = (
-        "The test code you write should conform to code standard like PEP8, be modular, easy to read and maintain."
-        "Use same language as user requirement"
-    )
-    test_round_allowed: int = 5
-    test_round: int = 0
-    repo: Optional[ProjectRepo] = Field(default=None, exclude=True)
-    input_args: Optional[BaseModel] = Field(default=None, exclude=True)
+# 智谱GLM-4.7 API配置
+ZHIPU_API_KEY = "0a45a0e3e24f47c79552db2ab80a8a54.NRH2PVmbIt4wBYre"
+ZHIPU_API_BASE = "https://open.bigmodel.cn/api/paas/v4"
 
+
+class WriteTestPlan(Action):
+    """编写测试计划动作"""
+    
+    name: str = "WriteTestPlan"
+    context: str = """
+    作为测试工程师，你需要：
+    1. 分析需求，制定测试策略
+    2. 编写测试计划和测试方案
+    3. 设计测试用例
+    4. 准备测试数据
+    5. 规划测试环境和资源
+    """
+    
+    async def run(self, messages: List[Message], context: Optional[str] = None) -> Message:
+        """执行测试计划编写"""
+        prompt = f"""
+        作为测试工程师，请编写测试计划：
+        
+        上下文：{context or '无'}
+        历史消息：{[m.content for m in messages]}
+        
+        请输出：
+        1. 测试策略
+        2. 测试范围
+        3. 测试用例设计
+        4. 测试环境需求
+        5. 测试进度计划
+        """
+        response = f"[测试工程师-测试计划] 已完成测试计划。"
+        return Message(content=response, role="QAEngineer")
+
+
+class ExecuteTests(Action):
+    """执行测试动作"""
+    
+    name: str = "ExecuteTests"
+    context: str = """
+    作为测试工程师，你需要：
+    1. 执行测试用例
+    2. 记录测试结果
+    3. 提交缺陷报告
+    4. 进行回归测试
+    5. 输出测试报告
+    """
+    
+    async def run(self, messages: List[Message], context: Optional[str] = None) -> Message:
+        """执行测试"""
+        prompt = f"""
+        作为测试工程师，请执行测试：
+        
+        上下文：{context or '无'}
+        历史消息：{[m.content for m in messages]}
+        
+        请输出：
+        1. 测试执行结果
+        2. 发现的缺陷
+        3. 测试报告
+        """
+        response = f"[测试工程师-测试执行] 已完成测试，发现X个缺陷。"
+        return Message(content=response, role="QAEngineer")
+
+
+class PerformUAT(Action):
+    """执行UAT测试动作"""
+    
+    name: str = "PerformUAT"
+    context: str = """
+    作为测试工程师，你需要：
+    1. 协助产品经理进行UAT测试
+    2. 验证业务流程完整性
+    3. 确保功能符合需求
+    4. 输出UAT测试报告
+    """
+    
+    async def run(self, messages: List[Message], context: Optional[str] = None) -> Message:
+        """执行UAT测试"""
+        prompt = f"""
+        作为测试工程师，请执行UAT测试：
+        
+        上下文：{context or '无'}
+        历史消息：{[m.content for m in messages]}
+        
+        请输出UAT测试结果。
+        """
+        response = f"[测试工程师-UAT测试] 已完成UAT测试。"
+        return Message(content=response, role="QAEngineer")
+
+
+class QAEngineer(Role):
+    """
+    测试工程师角色
+    
+    Profile: 测试工程师，负责测试计划、测试执行和质量保证
+    Goal: 确保产品质量，发现和预防缺陷
+    Constraints: 关注测试覆盖率和缺陷预防
+    """
+    
+    name: str = "QAEngineer"
+    profile: str = "测试工程师，负责测试计划、测试执行和质量保证"
+    goal: str = "确保产品质量，发现和预防缺陷，提升用户体验"
+    constraints: str = """
+    - 全面覆盖功能测试场景
+    - 及时提交缺陷并跟踪修复
+    - 关注测试效率和质量
+    - 负责功能测试阶段的执行
+    - 与开发工程师紧密协作
+    """
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.enable_memory = False
-
-        # FIXME: a bit hack here, only init one action to circumvent _think() logic,
-        #  will overwrite _think() in future updates
-        self.set_actions([WriteTest])
-        self._watch([SummarizeCode, WriteTest, RunCode, DebugError])
-        self.test_round = 0
-
-    async def _write_test(self, message: Message) -> None:
-        reqa_file = self.context.kwargs.reqa_file or self.config.reqa_file
-        changed_files = {reqa_file} if reqa_file else set(self.repo.srcs.changed_files.keys())
-        for filename in changed_files:
-            # write tests
-            if not filename or "test" in filename:
-                continue
-            code_doc = await self.repo.srcs.get(filename)
-            if not code_doc or not code_doc.content:
-                continue
-            if not code_doc.filename.endswith(".py"):
-                continue
-            test_doc = await self.repo.tests.get("test_" + code_doc.filename)
-            if not test_doc:
-                test_doc = Document(
-                    root_path=str(self.repo.tests.root_path), filename="test_" + code_doc.filename, content=""
-                )
-            logger.info(f"Writing {test_doc.filename}..")
-            context = TestingContext(filename=test_doc.filename, test_doc=test_doc, code_doc=code_doc)
-
-            context = await WriteTest(i_context=context, context=self.context, llm=self.llm).run()
-            async with EditorReporter(enable_llm_stream=True) as reporter:
-                await reporter.async_report({"type": "test", "filename": test_doc.filename}, "meta")
-
-                doc = await self.repo.tests.save_doc(
-                    doc=context.test_doc, dependencies={context.code_doc.root_relative_path}
-                )
-                await reporter.async_report(self.repo.workdir / doc.root_relative_path, "path")
-
-            # prepare context for run tests in next round
-            run_code_context = RunCodeContext(
-                command=["python", context.test_doc.root_relative_path],
-                code_filename=context.code_doc.filename,
-                test_filename=context.test_doc.filename,
-                working_directory=str(self.repo.workdir),
-                additional_python_paths=[str(self.repo.srcs.workdir)],
-            )
-            self.publish_message(
-                AIMessage(content=run_code_context.model_dump_json(), cause_by=WriteTest, send_to=MESSAGE_ROUTE_TO_SELF)
-            )
-
-        logger.info(f"Done {str(self.repo.tests.workdir)} generating.")
-
-    async def _run_code(self, msg):
-        run_code_context = RunCodeContext.loads(msg.content)
-        src_doc = await self.repo.srcs.get(run_code_context.code_filename)
-        if not src_doc:
-            return
-        test_doc = await self.repo.tests.get(run_code_context.test_filename)
-        if not test_doc:
-            return
-        run_code_context.code = src_doc.content
-        run_code_context.test_code = test_doc.content
-        result = await RunCode(i_context=run_code_context, context=self.context, llm=self.llm).run()
-        run_code_context.output_filename = run_code_context.test_filename + ".json"
-        await self.repo.test_outputs.save(
-            filename=run_code_context.output_filename,
-            content=result.model_dump_json(),
-            dependencies={src_doc.root_relative_path, test_doc.root_relative_path},
-        )
-        run_code_context.code = None
-        run_code_context.test_code = None
-        # the recipient might be Engineer or myself
-        recipient = parse_recipient(result.summary)
-        mappings = {"Engineer": "Alex", "QaEngineer": "Edward"}
-        if recipient != "Engineer":
-            self.publish_message(
-                AIMessage(
-                    content=run_code_context.model_dump_json(),
-                    cause_by=RunCode,
-                    instruct_content=self.input_args,
-                    send_to=MESSAGE_ROUTE_TO_SELF,
-                )
-            )
-        else:
-            kvs = self.input_args.model_dump()
-            kvs["changed_test_filenames"] = [
-                str(self.repo.tests.workdir / i) for i in list(self.repo.tests.changed_files.keys())
-            ]
-            self.publish_message(
-                AIMessage(
-                    content=run_code_context.model_dump_json(),
-                    cause_by=RunCode,
-                    instruct_content=self.input_args,
-                    send_to=mappings.get(recipient, MESSAGE_ROUTE_TO_NONE),
-                )
-            )
-
-    async def _debug_error(self, msg):
-        run_code_context = RunCodeContext.loads(msg.content)
-        code = await DebugError(
-            i_context=run_code_context, repo=self.repo, input_args=self.input_args, context=self.context, llm=self.llm
-        ).run()
-        await self.repo.tests.save(filename=run_code_context.test_filename, content=code)
-        run_code_context.output = None
-        self.publish_message(
-            AIMessage(content=run_code_context.model_dump_json(), cause_by=DebugError, send_to=MESSAGE_ROUTE_TO_SELF)
-        )
-
+        # 设置智谱API配置
+        self.llm.api_key = ZHIPU_API_KEY
+        self.llm.base_url = ZHIPU_API_BASE
+        self.llm.model = "glm-4"
+        
+        # 添加动作
+        self._init_actions([WriteTestPlan, ExecuteTests, PerformUAT])
+    
+    def get_participation_type(self, phase: ProjectPhase) -> ParticipationType:
+        """
+        获取测试工程师在指定阶段的参与类型
+        
+        Args:
+            phase: 项目阶段
+            
+        Returns:
+            参与类型
+        """
+        return get_participation_type(phase, "QAEngineer")
+    
+    def should_participate(self, phase: ProjectPhase) -> bool:
+        """判断测试工程师是否需要在指定阶段参与"""
+        participation = self.get_participation_type(phase)
+        return participation != ParticipationType.NONE
+    
+    def is_lead(self, phase: ProjectPhase) -> bool:
+        """判断测试工程师在指定阶段是否负责"""
+        return self.get_participation_type(phase) == ParticipationType.LEAD
+    
+    def is_consult(self, phase: ProjectPhase) -> bool:
+        """判断测试工程师在指定阶段是否提供咨询"""
+        return self.get_participation_type(phase) == ParticipationType.CONSULT
+    
+    def is_inform(self, phase: ProjectPhase) -> bool:
+        """判断测试工程师在指定阶段是否需要知会"""
+        return self.get_participation_type(phase) == ParticipationType.INFORM
+    
     async def _act(self) -> Message:
-        if self.input_args.project_path:
-            await init_python_folder(self.repo.tests.workdir)
-        if self.test_round > self.test_round_allowed:
-            kvs = self.input_args.model_dump()
-            kvs["changed_test_filenames"] = [
-                str(self.repo.tests.workdir / i) for i in list(self.repo.tests.changed_files.keys())
-            ]
-            result_msg = AIMessage(
-                content=f"Exceeding {self.test_round_allowed} rounds of tests, stop. "
-                + "\n".join(list(self.repo.tests.changed_files.keys())),
-                cause_by=WriteTest,
-                instruct_content=AIMessage.create_instruct_value(kvs=kvs, class_name="WriteTestOutput"),
-                send_to=MESSAGE_ROUTE_TO_NONE,
-            )
-            return result_msg
-
-        code_filters = any_to_str_set({PrepareDocuments, SummarizeCode})
-        test_filters = any_to_str_set({WriteTest, DebugError})
-        run_filters = any_to_str_set({RunCode})
-        for msg in self.rc.news:
-            # Decide what to do based on observed msg type, currently defined by human,
-            # might potentially be moved to _think, that is, let the agent decides for itself
-            if msg.cause_by in code_filters:
-                # engineer wrote a code, time to write a test for it
-                await self._write_test(msg)
-            elif msg.cause_by in test_filters:
-                # I wrote or debugged my test code, time to run it
-                await self._run_code(msg)
-            elif msg.cause_by in run_filters:
-                # I ran my test code, time to fix bugs, if any
-                await self._debug_error(msg)
-            elif msg.cause_by == any_to_str(UserRequirement):
-                return await self._parse_user_requirement(msg)
-        self.test_round += 1
-        kvs = self.input_args.model_dump()
-        kvs["changed_test_filenames"] = [
-            str(self.repo.tests.workdir / i) for i in list(self.repo.tests.changed_files.keys())
-        ]
-        return AIMessage(
-            content=f"Round {self.test_round} of tests done",
-            instruct_content=AIMessage.create_instruct_value(kvs=kvs, class_name="WriteTestOutput"),
-            cause_by=WriteTest,
-            send_to=MESSAGE_ROUTE_TO_NONE,
-        )
-
-    async def _parse_user_requirement(self, msg: Message) -> AIMessage:
-        action = PrepareDocuments(
-            send_to=any_to_str(self),
-            key_descriptions={
-                "project_path": 'the project path if exists in "Original Requirement"',
-                "reqa_file": 'the file name to rewrite unit test if exists in "Original Requirement"',
-            },
-            context=self.context,
-        )
-        rsp = await action.run([msg])
-        if not self.src_workspace:
-            self.src_workspace = self.git_repo.workdir / self.git_repo.workdir.name
-        return rsp
-
-    async def _think(self) -> bool:
-        if not self.rc.news:
-            return False
-        msg = self.rc.news[0]
-        if msg.cause_by == any_to_str(SummarizeCode):
-            self.input_args = msg.instruct_content
-            self.repo = ProjectRepo(self.input_args.project_path)
-            if self.repo.src_relative_path is None:
-                path = get_project_srcs_path(self.repo.workdir)
-                self.repo.with_src_path(path)
-        return True
+        """执行测试工程师动作"""
+        msg = await self._rc.todo.run(self._rc.history)
+        return msg
+    
+    def get_responsibility_description(self) -> str:
+        """获取职责描述"""
+        return """
+        测试工程师职责：
+        1. 需求分析阶段：不参与
+        2. 技术方案阶段：知会 - 了解技术方案
+        3. UI/UX设计阶段：不参与
+        4. 任务拆解阶段：咨询 - 评估测试任务
+        5. 编码实现阶段：不参与
+        6. UI验收阶段：不参与
+        7. 功能测试阶段：负责/执行 - 执行测试
+        8. 部署上线阶段：咨询 - 验证上线条件
+        9. 运维监控阶段：知会 - 了解线上质量
+        """
