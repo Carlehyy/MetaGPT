@@ -1,0 +1,219 @@
+# MetaGPT Agent Company 配置文件
+# ================================
+
+# 应用配置
+app:
+  name: "MetaGPT Agent Company"
+  version: "1.0.0"
+  debug: false
+  log_level: "INFO"
+  data_dir: "./data"
+  output_dir: "./outputs"
+
+# LLM 配置 (智谱GLM-4)
+llm:
+  provider: "zhipu"
+  api_key: "0a45a0e3e24f47c79552db2ab80a8a54.NRH2PVmbIt4wBYre"
+  model: "glm-4"
+  base_url: "https://open.bigmodel.cn/api/paas/v4"
+  temperature: 0.7
+  max_tokens: 4096
+  timeout: 60
+
+# 飞书机器人配置
+feishu:
+  app_id: "cli_a90f6f9494f81bcd"
+  app_secret: "frW8P3XZQxoP5lG8QMqDvdLHYG3OhzEY"
+  verification_token: null
+  encrypt_key: null
+  webhook_url: null
+  base_url: "https://open.feishu.cn/open-apis"
+  token_expire_buffer: 300
+
+# 讨论引擎配置
+discussion:
+  max_rounds_per_phase: 20
+  consensus_threshold: 0.8
+  auto_save_interval: 60
+  pass_threshold: 3
+  content_similarity_threshold: 0.9
+  enable_llm_judgment: true
+  boss_intervention_timeout: 300
+  
+  # 共识检测策略
+  consensus_strategy: "HYBRID"  # EXPLICIT, ROUND_LIMIT, PASS_RATIO, CONTENT_SIMILARITY, LLM_JUDGMENT, HYBRID
+  
+  # 轮流发言策略
+  turn_order_strategy: "ROUND_ROBIN"  # ROUND_ROBIN, WEIGHTED, PRIORITY_BASED
+  
+  # 停滞检测
+  enable_stagnation_detection: true
+  stagnation_rounds: 3
+  
+  # 老板介入关键词
+  boss_intervention_keywords:
+    - "我决定"
+    - "听我的"
+    - "就这样"
+    - "执行"
+    - "定下来"
+    - "final decision"
+    - "execute"
+    - "do it"
+
+# 9个阶段配置
+phases:
+  - phase_id: "P1"
+    name: "需求分析"
+    description: "明确产品需求和用户故事，输出PRD文档"
+    max_rounds: 20
+    required_roles: ["R2", "R3"]  # PM, Architect
+    optional_roles: ["R4", "R5"]  # UI, ProjectManager
+    deliverable_type: "PRD"
+    accountable_role: "R2"  # 产品经理负责
+    
+  - phase_id: "P2"
+    name: "技术方案设计"
+    description: "确定系统架构和技术选型，输出架构设计文档"
+    max_rounds: 20
+    required_roles: ["R3", "R6"]  # Architect, Dev
+    optional_roles: ["R2", "R8"]  # PM, Ops
+    deliverable_type: "Architecture"
+    accountable_role: "R3"  # 架构师负责
+    
+  - phase_id: "P3"
+    name: "UI/UX设计"
+    description: "完成界面和交互设计，输出设计稿"
+    max_rounds: 20
+    required_roles: ["R4", "R2"]  # UI, PM
+    optional_roles: ["R3"]  # Architect
+    deliverable_type: "Design"
+    accountable_role: "R4"  # 产品设计师负责
+    
+  - phase_id: "P4"
+    name: "任务拆解"
+    description: "将工作分解为可执行任务，输出任务清单"
+    max_rounds: 20
+    required_roles: ["R5", "R6", "R7"]  # ProjectManager, Dev, QA
+    optional_roles: ["R2", "R3"]  # PM, Architect
+    deliverable_type: "TaskList"
+    accountable_role: "R5"  # 项目经理负责
+    
+  - phase_id: "P5"
+    name: "编码实现"
+    description: "完成代码开发，输出可运行代码"
+    max_rounds: 20
+    required_roles: ["R6", "R3"]  # Dev, Architect
+    optional_roles: ["R5"]  # ProjectManager
+    deliverable_type: "Code"
+    accountable_role: "R6"  # 开发工程师负责
+    
+  - phase_id: "P6"
+    name: "UI验收"
+    description: "验证UI实现效果，输出验收报告"
+    max_rounds: 20
+    required_roles: ["R4", "R6", "R2"]  # UI, Dev, PM
+    optional_roles: ["R7"]  # QA
+    deliverable_type: "UIReport"
+    accountable_role: "R4"  # 产品设计师负责
+    
+  - phase_id: "P7"
+    name: "功能测试"
+    description: "完成功能测试，输出测试报告"
+    max_rounds: 20
+    required_roles: ["R7", "R6"]  # QA, Dev
+    optional_roles: ["R2", "R5"]  # PM, ProjectManager
+    deliverable_type: "TestReport"
+    accountable_role: "R7"  # 测试工程师负责
+    
+  - phase_id: "P8"
+    name: "部署上线"
+    description: "完成部署和发布，输出部署文档"
+    max_rounds: 20
+    required_roles: ["R8", "R6", "R3"]  # Ops, Dev, Architect
+    optional_roles: ["R2"]  # PM
+    deliverable_type: "Deployment"
+    accountable_role: "R5"  # 项目经理负责
+    
+  - phase_id: "P9"
+    name: "运维监控"
+    description: "建立监控和运维体系，输出监控方案"
+    max_rounds: 20
+    required_roles: ["R8", "R6"]  # Ops, Dev
+    optional_roles: ["R3"]  # Architect
+    deliverable_type: "Monitoring"
+    accountable_role: "R8"  # 运维工程师负责
+
+# 角色配置
+roles:
+  R1:  # 老板
+    name: "老板"
+    profile: "Boss"
+    goal: "做出最终决策，确保项目成功"
+    constraints: "拥有最高决策权，可随时介入"
+    skills: ["决策", "管理", "协调"]
+    
+  R2:  # 产品经理
+    name: "产品经理"
+    profile: "Product Manager"
+    goal: "定义产品需求，编写PRD，确保产品符合用户需求"
+    constraints: "关注用户需求和商业价值"
+    skills: ["需求分析", "PRD编写", "用户研究", "竞品分析"]
+    
+  R3:  # 架构师
+    name: "架构师"
+    profile: "Architect"
+    goal: "设计系统架构，选择技术栈，确保系统可扩展性"
+    constraints: "关注系统性能、可扩展性和安全性"
+    skills: ["架构设计", "技术选型", "性能优化", "系统设计"]
+    
+  R4:  # 产品设计师
+    name: "产品设计师"
+    profile: "UI/UX Designer"
+    goal: "设计用户界面和交互，提升用户体验"
+    constraints: "关注用户体验和视觉设计"
+    skills: ["UI设计", "UX设计", "原型设计", "用户测试"]
+    
+  R5:  # 项目经理
+    name: "项目经理"
+    profile: "Project Manager"
+    goal: "拆解任务，管理进度，协调资源"
+    constraints: "关注项目进度和资源分配"
+    skills: ["任务拆解", "进度管理", "资源协调", "风险管理"]
+    
+  R6:  # 开发工程师
+    name: "开发工程师"
+    profile: "Software Engineer"
+    goal: "完成代码开发，实现功能需求"
+    constraints: "关注代码质量和实现效率"
+    skills: ["编程", "代码审查", "单元测试", "调试"]
+    
+  R7:  # 测试工程师
+    name: "测试工程师"
+    profile: "QA Engineer"
+    goal: "保证软件质量，发现和跟踪bug"
+    constraints: "关注测试覆盖率和bug修复"
+    skills: ["测试用例设计", "功能测试", "自动化测试", "bug跟踪"]
+    
+  R8:  # 运维工程师
+    name: "运维工程师"
+    profile: "DevOps Engineer"
+    goal: "完成部署上线，建立运维监控体系"
+    constraints: "关注系统稳定性和可运维性"
+    skills: ["部署", "CI/CD", "监控", "故障处理"]
+
+# 状态持久化配置
+persistence:
+  enabled: true
+  storage_type: "file"  # file, redis, database
+  save_interval: 60
+  backup_count: 5
+  state_file: "./data/state.json"
+  history_dir: "./data/history"
+
+# Web服务器配置
+web:
+  host: "0.0.0.0"
+  port: 8000
+  webhook_path: "/webhook/feishu"
+  health_check_path: "/health"
