@@ -12,12 +12,23 @@ AI驱动的虚拟软件公司Web可视化平台，8个AI角色按照职责矩阵
 - **@提醒功能**: AI需要咨询老板时自动@提醒，支持多次提醒
 - **职责矩阵**: 严格按照预设规则执行各阶段任务
 
+## GitHub地址
+
+**分支**: `agent-company`
+**地址**: https://github.com/Carlehyy/MetaGPT/tree/agent-company/web-version
+
 ## 快速开始
 
-### 1. 安装依赖
+### 1. 克隆代码
 
 ```bash
-cd /mnt/okcomputer/output
+git clone -b agent-company https://github.com/Carlehyy/MetaGPT.git
+cd MetaGPT/web-version
+```
+
+### 2. 安装依赖
+
+```bash
 pip install -r requirements.txt
 ```
 
