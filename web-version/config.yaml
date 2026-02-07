@@ -1,0 +1,136 @@
+# AI虚拟软件公司 - 配置文件
+# ==========================
+
+# 应用配置
+app:
+  name: "AI虚拟软件公司"
+  version: "1.0.0"
+  debug: false
+  log_level: "INFO"
+
+# LLM 配置 (智谱GLM-4)
+llm:
+  provider: "zhipu"
+  api_key: "0a45a0e3e24f47c79552db2ab80a8a54.NRH2PVmbIt4wBYre"
+  model: "glm-4"
+  base_url: "https://open.bigmodel.cn/api/paas/v4"
+  temperature: 0.7
+  max_tokens: 4096
+  timeout: 60
+
+# Web服务器配置
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+
+# 提醒服务配置
+reminder:
+  # 提醒间隔（秒）
+  interval: 30
+  # 最大提醒次数
+  max_reminders: 5
+  # 老板超时时间（秒）
+  boss_timeout: 300
+  # @关键词
+  mention_keywords:
+    - "@老板"
+    - "@Boss"
+    - "@boss"
+
+# 9个阶段配置
+phases:
+  - id: "P1"
+    name: "需求分析"
+    description: "明确产品需求和用户故事，输出PRD文档"
+    leader: "产品经理"
+    
+  - id: "P2"
+    name: "技术方案设计"
+    description: "确定系统架构和技术选型，输出架构设计文档"
+    leader: "架构师"
+    
+  - id: "P3"
+    name: "UI/UX设计"
+    description: "完成界面和交互设计，输出设计稿"
+    leader: "产品设计师"
+    
+  - id: "P4"
+    name: "任务拆解"
+    description: "将工作分解为可执行任务，输出任务清单"
+    leader: "项目经理"
+    
+  - id: "P5"
+    name: "编码实现"
+    description: "完成代码开发，输出可运行代码"
+    leader: "开发工程师"
+    
+  - id: "P6"
+    name: "UI验收"
+    description: "验证UI实现效果，输出验收报告"
+    leader: "产品设计师"
+    
+  - id: "P7"
+    name: "功能测试"
+    description: "完成功能测试，输出测试报告"
+    leader: "测试工程师"
+    
+  - id: "P8"
+    name: "部署上线"
+    description: "部署到生产环境，输出部署文档"
+    leader: "项目经理"
+    
+  - id: "P9"
+    name: "运维监控"
+    description: "监控系统运行，输出运维报告"
+    leader: "运维工程师"
+
+# 8个角色配置
+roles:
+  - id: "boss"
+    name: "老板"
+    avatar: "👔"
+    color: "#8b5cf6"
+    description: "战略决策、资源分配、最终验收"
+    
+  - id: "pm"
+    name: "产品经理"
+    avatar: "📋"
+    color: "#f59e0b"
+    description: "需求分析、PRD编写、需求评审"
+    
+  - id: "architect"
+    name: "架构师"
+    avatar: "🏗️"
+    color: "#10b981"
+    description: "技术方案设计、架构设计"
+    
+  - id: "designer"
+    name: "产品设计师"
+    avatar: "🎨"
+    color: "#ec4899"
+    description: "UI/UX设计、设计稿输出"
+    
+  - id: "pjm"
+    name: "项目经理"
+    avatar: "📊"
+    color: "#06b6d4"
+    description: "任务拆解、项目计划、进度管理"
+    
+  - id: "engineer"
+    name: "开发工程师"
+    avatar: "💻"
+    color: "#6366f1"
+    description: "编码实现、单元测试"
+    
+  - id: "qa"
+    name: "测试工程师"
+    avatar: "🧪"
+    color: "#f97316"
+    description: "功能测试、UAT验收"
+    
+  - id: "devops"
+    name: "运维工程师"
+    avatar: "🚀"
+    color: "#14b8a6"
+    description: "部署上线、运维监控"
