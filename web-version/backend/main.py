@@ -111,27 +111,42 @@ def init_discussion_engine():
         discussion_engine.register_role(role)
         logger.info(f"注册角色: {role.name}")
 
-    # 注册消息回调 - 将AI消息广播到WebSocket
-    async def broadcast_ai_message(message):
+# 注册消息回调 - 将AI消息广播到WebSocket
+    def broadcast_ai_message(message):
         """广播AI消息到所有客户端"""
         from backend.websocket import WebSocketMessage
+        import asyncio
 
-        await manager.broadcast(WebSocketMessage(
+        # 获取发送者角色
+        sender_role = message.sender if hasattr(message, "sender") and message.sender else message.role
+
+        # 创建WebSocket消息
+        ws_message = WebSocketMessage(
             type="ai_message",
             data={
                 "id": message.id if hasattr(message, "id") else str(datetime.now().timestamp()),
-                "role": message.role,
+                "role": sender_role,
                 "content": message.content,
                 "timestamp": datetime.now().isoformat(),
                 "phase": storage.get_current_phase().id.value
             }
-        ))
+        )
+
+        # 使用asyncio.create_task执行异步广播
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                asyncio.create_task(manager.broadcast(ws_message))
+            else:
+                loop.run_until_complete(manager.broadcast(ws_message))
+        except Exception as e:
+            logger.error(f"广播消息失败: {e}")
 
         # 同时存储到storage
         from backend.storage import Message as StorageMessage
         storage_msg = StorageMessage(
             id=message.id if hasattr(message, "id") else str(datetime.now().timestamp()),
-            role=message.role,
+            role=sender_role,
             content=message.content,
             phase=storage.get_current_phase().id,
             timestamp=datetime.now(),
@@ -140,7 +155,7 @@ def init_discussion_engine():
         )
         storage.add_message(storage_msg)
 
-        logger.info(f"AI角色 [{message.role}] 发言: {message.content[:50]}...")
+        logger.info(f"AI角色 [{sender_role}] 发言: {message.content[:50]}...")
 
     discussion_engine.add_message_callback(broadcast_ai_message)
 
