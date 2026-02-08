@@ -2,13 +2,15 @@
 FastAPI主应用 - 后端API服务入口
 """
 import logging
+import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 from .storage import storage, PhaseType
 from .websocket import manager, websocket_endpoint
@@ -25,36 +27,39 @@ logger = logging.getLogger(__name__)
 # 启动时间
 START_TIME = datetime.now()
 
+# 获取当前文件所在目录
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     应用生命周期管理
-    
+
     在应用启动和关闭时执行的操作
     """
     # 启动时
     logger.info("=" * 50)
     logger.info("AI虚拟软件公司后端服务启动中...")
     logger.info("=" * 50)
-    
+
     # 初始化阶段
     storage.set_current_phase(PhaseType.REQUIREMENT)
     logger.info(f"当前阶段: {storage.get_current_phase().name}")
-    
+
     # 启动提醒服务
     reminder_service.start()
-    
+
     logger.info("服务启动完成，等待连接...")
-    
+
     yield
-    
+
     # 关闭时
     logger.info("服务正在关闭...")
-    
+
     # 停止提醒服务
     reminder_service.stop()
-    
+
     logger.info("服务已关闭")
 
 
@@ -75,6 +80,12 @@ app.add_middleware(
     allow_headers=["*"],  # 允许所有头
 )
 
+# 挂载静态文件
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+
+# 配置模板
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+
 # 注册API路由
 app.include_router(api_router)
 
@@ -85,7 +96,7 @@ app.include_router(api_router)
 async def websocket_general(websocket: WebSocket):
     """
     普通客户端WebSocket连接
-    
+
     用于AI角色和观察者连接
     """
     await websocket_endpoint(websocket, is_boss=False)
@@ -95,17 +106,23 @@ async def websocket_general(websocket: WebSocket):
 async def websocket_boss(websocket: WebSocket):
     """
     老板专用WebSocket连接
-    
+
     用于老板发送消息和接收提醒
     """
     await websocket_endpoint(websocket, is_boss=True)
 
 
-# ============ 根端点 ============
+# ============ 根端点 - 返回前端页面 ============
 
-@app.get("/")
-async def root():
-    """根端点 - 返回API信息"""
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    """根端点 - 返回前端页面"""
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/api")
+async def api_info():
+    """API信息"""
     return {
         "name": "AI虚拟软件公司 API",
         "version": "1.0.0",
@@ -124,7 +141,7 @@ async def info():
     """获取系统详细信息"""
     uptime = datetime.now() - START_TIME
     current_phase = storage.get_current_phase()
-    
+
     return {
         "name": "AI虚拟软件公司 API",
         "version": "1.0.0",
@@ -169,16 +186,16 @@ async def global_exception_handler(request, exc):
 def run_server(host: str = "0.0.0.0", port: int = 8000, reload: bool = False):
     """
     启动服务器
-    
+
     Args:
         host: 主机地址
         port: 端口号
         reload: 是否启用热重载
     """
     import uvicorn
-    
+
     logger.info(f"启动服务器: {host}:{port}")
-    
+
     uvicorn.run(
         "backend.main:app",
         host=host,
