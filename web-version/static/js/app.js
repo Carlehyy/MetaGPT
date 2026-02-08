@@ -5,7 +5,7 @@
 
 // ===== 配置 =====
 const CONFIG = {
-    WS_URL: 'ws://localhost:8000/ws/chat',
+    WS_URL: 'ws://38.14.254.160:8000/ws/boss',
     RECONNECT_INTERVAL: 3000,
     MAX_RECONNECT_ATTEMPTS: 5
 };
@@ -436,8 +436,8 @@ function sendMessage(content) {
     // 发送到服务器
     if (state.ws && state.ws.readyState === WebSocket.OPEN) {
         state.ws.send(JSON.stringify({
-            type: 'message',
-            payload: message
+            type: 'boss_message',
+            data: { content: content.trim(), timestamp: Date.now() }
         }));
     }
     
