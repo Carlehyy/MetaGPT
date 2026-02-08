@@ -3,6 +3,7 @@ FastAPI主应用 - 后端API服务入口
 """
 import logging
 import os
+import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime
 
@@ -17,6 +18,14 @@ from .websocket import manager, websocket_endpoint
 from .api import router as api_router
 from .reminder import reminder_service
 
+# 导入讨论引擎和角色
+from discussion.engine import DiscussionEngine
+from roles import (
+    Boss, ProductManager, Architect, ProductDesigner,
+    ProjectManager, Engineer, QAEngineer, DevOps,
+    Phase, Role
+)
+
 # 配置日志
 logging.basicConfig(
     level=logging.INFO,
@@ -30,6 +39,115 @@ START_TIME = datetime.now()
 # 获取当前文件所在目录
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# 全局讨论引擎实例
+discussion_engine: DiscussionEngine = None
+
+
+async def handle_boss_message(message):
+    """
+    处理老板发送的消息
+
+    当老板发送消息后，触发AI角色讨论
+    """
+    global discussion_engine
+
+    logger.info(f"收到老板消息: {message.content[:50]}...")
+
+    # 检查是否是需求消息（包含关键词）
+    content = message.content.lower()
+    is_requirement = any(keyword in content for keyword in [
+        "需求", "开发", "产品", "功能", "系统", "app", "网站", "平台",
+        "需要", "想要", "做一个", "设计一个", "实现"
+    ])
+
+    if is_requirement and discussion_engine:
+        logger.info("检测到需求消息，启动AI角色讨论...")
+
+        # 获取当前阶段
+        current_phase = storage.get_current_phase()
+        phase_enum = Phase(current_phase.id.value)
+
+        # 启动讨论
+        asyncio.create_task(
+            discussion_engine.start_discussion(
+                phase=phase_enum,
+                topic=f"讨论需求: {message.content[:30]}...",
+                initial_message=message.content
+            )
+        )
+    else:
+        logger.info("非需求消息，仅广播给所有客户端")
+
+
+def init_discussion_engine():
+    """
+    初始化讨论引擎
+
+    注册所有AI角色和消息回调
+    """
+    global discussion_engine
+
+    logger.info("初始化讨论引擎...")
+
+    # 创建讨论引擎
+    discussion_engine = DiscussionEngine(
+        max_rounds=5,
+        consensus_threshold=2,
+        auto_invite_boss=True
+    )
+
+    # 注册所有AI角色
+    roles = [
+        ProductManager(),
+        Architect(),
+        ProductDesigner(),
+        ProjectManager(),
+        Engineer(),
+        QAEngineer(),
+        DevOps(),
+    ]
+
+    for role in roles:
+        discussion_engine.register_role(role)
+        logger.info(f"注册角色: {role.name}")
+
+    # 注册消息回调 - 将AI消息广播到WebSocket
+    async def broadcast_ai_message(message):
+        """广播AI消息到所有客户端"""
+        from backend.websocket import WebSocketMessage
+
+        await manager.broadcast(WebSocketMessage(
+            type="ai_message",
+            data={
+                "id": message.id if hasattr(message, "id") else str(datetime.now().timestamp()),
+                "role": message.role,
+                "content": message.content,
+                "timestamp": datetime.now().isoformat(),
+                "phase": storage.get_current_phase().id.value
+            }
+        ))
+
+        # 同时存储到storage
+        from backend.storage import Message as StorageMessage
+        storage_msg = StorageMessage(
+            id=message.id if hasattr(message, "id") else str(datetime.now().timestamp()),
+            role=message.role,
+            content=message.content,
+            phase=storage.get_current_phase().id,
+            timestamp=datetime.now(),
+            message_type="text",
+            metadata={"source": "ai"}
+        )
+        storage.add_message(storage_msg)
+
+        logger.info(f"AI角色 [{message.role}] 发言: {message.content[:50]}...")
+
+    discussion_engine.add_message_callback(broadcast_ai_message)
+
+    logger.info(f"讨论引擎初始化完成，已注册 {len(roles)} 个AI角色")
+
+    return discussion_engine
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,6 +156,8 @@ async def lifespan(app: FastAPI):
 
     在应用启动和关闭时执行的操作
     """
+    global discussion_engine
+
     # 启动时
     logger.info("=" * 50)
     logger.info("AI虚拟软件公司后端服务启动中...")
@@ -49,6 +169,13 @@ async def lifespan(app: FastAPI):
 
     # 启动提醒服务
     reminder_service.start()
+
+    # 初始化讨论引擎
+    init_discussion_engine()
+
+    # 注册老板消息处理器
+    manager.register_boss_message_handler(handle_boss_message)
+    logger.info("老板消息处理器已注册")
 
     logger.info("服务启动完成，等待连接...")
 
