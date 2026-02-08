@@ -393,19 +393,38 @@ function initWebSocket() {
 }
 
 function handleWebSocketMessage(data) {
+    console.log('收到WebSocket消息:', data);
     switch (data.type) {
+        case 'boss_message':
+            // 老板消息确认
+            console.log('老板消息已发送');
+            break;
+        case 'ai_message':
+            // AI角色消息
+            if (data.data) {
+                const msg = {
+                    id: data.data.id || Date.now(),
+                    roleId: data.data.role || 'assistant',
+                    content: data.data.content || '',
+                    timestamp: data.data.timestamp || Date.now()
+                };
+                addMessage(msg);
+            }
+            break;
         case 'message':
-            addMessage(data.payload);
+            addMessage(data.payload || data.data);
             break;
         case 'typing':
-            showTypingIndicator(data.payload.roleId);
+            showTypingIndicator((data.payload || data.data).roleId);
             break;
         case 'phase_change':
-            setPhase(data.payload.phaseIndex);
+            setPhase((data.payload || data.data).phaseIndex);
             break;
         case 'system':
-            addSystemMessage(data.payload.content);
+            addSystemMessage((data.payload || data.data).message || (data.payload || data.data).content);
             break;
+        default:
+            console.log('未知消息类型:', data.type);
     }
 }
 
